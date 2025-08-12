@@ -1,0 +1,1 @@
+MAX_LENGTH_HERO_NAME: int = 128
