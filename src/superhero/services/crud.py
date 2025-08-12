@@ -1,15 +1,12 @@
 from typing import Sequence
 
-from superhero.models import HeroModel
-from superhero.schemas import HeroBaseSchema
-from sqlalchemy import Result, select, and_
+from sqlalchemy import Result, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from superhero.schemas import HeroParamsSchema
+from superhero.models import HeroModel
+from superhero.schemas import HeroBaseSchema, HeroParamsSchema
 
 
-async def add_hero_to_db(
-    session: AsyncSession, new_hero: HeroBaseSchema
-) -> HeroModel:
+async def add_hero_to_db(session: AsyncSession, new_hero: HeroBaseSchema) -> HeroModel:
     db_new_hero = HeroModel(**new_hero.model_dump())
     session.add(db_new_hero)
     await session.commit()
@@ -18,15 +15,14 @@ async def add_hero_to_db(
 
 
 async def get_heros_from_db_by_params(
-    session: AsyncSession,
-    params: HeroParamsSchema
+    session: AsyncSession, params: HeroParamsSchema
 ) -> Sequence[HeroModel]:
     conditions = []
     for key, value in params.model_dump().items():
         if value:
             if key.endswith("_eq"):
                 column = getattr(HeroModel, key[:-3])
-                conditions.append(column==value)
+                conditions.append(column == value)
             elif key.endswith("_gt"):
                 column = getattr(HeroModel, key[:-3])
                 conditions.append(column > value)
