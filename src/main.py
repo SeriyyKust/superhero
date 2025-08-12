@@ -2,8 +2,7 @@ from contextlib import asynccontextmanager
 
 from database import Base, database_engine
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from superhero.models import HeroModel
+from superhero.router import router as superhero_router
 
 
 @asynccontextmanager
@@ -18,8 +17,4 @@ async def database_lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=database_lifespan)
-
-
-@app.get("/test")
-async def test_handler():
-    return JSONResponse(status_code=200, content={"message": "ok"})
+app.include_router(superhero_router)
