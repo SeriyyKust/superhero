@@ -1,3 +1,4 @@
+from typing import Sequence
 from database import get_database_session
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import (
@@ -6,8 +7,9 @@ from sqlalchemy.ext.asyncio import (
 from superhero.dependencies import get_params_for_hero
 from superhero.instantiation import get_info_hero_service
 from superhero.schemas import HeroAddSchema, HeroBaseSchema, HeroParamsSchema
-from superhero.services.crud import add_hero_to_db, get_heros_from_db_by_params
+from superhero.services.crud import add_hero_to_db, get_heroes_from_db_by_params
 from superhero.services.get_info_hero import GetInfoHeroError, HeroInfoDontExistError
+from superhero.models import HeroModel
 
 
 router = APIRouter(prefix="/heroes", tags=["heroes"])
@@ -17,7 +19,19 @@ router = APIRouter(prefix="/heroes", tags=["heroes"])
 async def api_add_hero(
     new_hero: HeroAddSchema, session: AsyncSession = Depends(get_database_session)
 ):
-    # Проверка в базе данных -> допустим его нет
+    try:
+        heroes: Sequence[HeroModel] = await get_heroes_from_db_by_params(
+            session=session,
+            params=HeroParamsSchema(
+                name=new_hero.name
+            )
+        )
+        if len(heroes):
+            return heroes[0]
+    except Exception:
+        raise HTTPException(
+            status_code=500, detail="Во время обращения к базе данных произошла ошибка."
+        )
     try:
         hero: HeroBaseSchema = await get_info_hero_service.execute(name=new_hero.name)
     except HeroInfoDontExistError:
@@ -48,4 +62,10 @@ async def api_get_heroes_by_params(
     params: HeroParamsSchema = Depends(get_params_for_hero),
     session: AsyncSession = Depends(get_database_session),
 ):
-    return await get_heros_from_db_by_params(session=session, params=params)
+    heroes: Sequence[HeroModel] = await get_heroes_from_db_by_params(session=session, params=params)
+    if not len(heroes):
+        raise HTTPException(
+            status_code=404,
+            detail="Супер герои с такими параметрами не найдены.",
+        )
+    return heroes

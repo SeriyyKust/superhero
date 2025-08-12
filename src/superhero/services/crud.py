@@ -14,7 +14,7 @@ async def add_hero_to_db(session: AsyncSession, new_hero: HeroBaseSchema) -> Her
     return db_new_hero
 
 
-async def get_heros_from_db_by_params(
+async def get_heroes_from_db_by_params(
     session: AsyncSession, params: HeroParamsSchema
 ) -> Sequence[HeroModel]:
     conditions = []
