@@ -40,7 +40,7 @@ class GetInfoHeroService:
                         "speed": int(content["results"][0]["powerstats"]["speed"]),
                         "power": int(content["results"][0]["powerstats"]["power"]),
                     }
-                    return HeroBaseSchema(**init_hero)
+                    return HeroBaseSchema.model_validate(init_hero)
                 except Exception as er:
                     raise GetInfoHeroError(
                         f"Во время выполнения запроса к сервису произошла ошибка {er}."

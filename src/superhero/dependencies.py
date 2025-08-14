@@ -1,7 +1,9 @@
 from typing import Annotated
 
+from config import settings
 from fastapi import Query
 from superhero.schemas import HeroParamsSchema
+from superhero.services.get_info_hero import GetInfoHeroService
 from superhero.static import MAX_LENGTH_HERO_NAME
 
 
@@ -40,3 +42,7 @@ def get_params_for_hero(
         power_lt=power_lt,
         power_gt=power_gt,
     )
+
+
+def get_info_hero_service() -> GetInfoHeroService:
+    return GetInfoHeroService(access_token=settings.access_token_to_hero_api)
